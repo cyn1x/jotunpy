@@ -1,0 +1,4 @@
+https://stackoverflow.com/questions/39801718/how-to-run-a-http-server-which-serves-a-specific-path
+https://stackoverflow.com/questions/52841147/python-server-will-not-terminate-on-ctrlc-after-a-request-has-come-in
+https://stackoverflow.com/questions/53190210/python-watchdog-ignoring-duplicate-events
+https://stackoverflow.com/questions/21991479/jinja2-correctly-indent-included-block
