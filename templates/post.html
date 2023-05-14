@@ -6,12 +6,14 @@
     <link rel="stylesheet" href="/static/css/styles.css">
   </head>
   <body>
+    {% filter indent(width=4,first=False) -%}
     {% include 'nav.html' %}
+    {%- endfilter %}
   <header>
     <h1>{{ title }}</h1>
   </header>
   <main>
-    {{ content }}
+    {{ content|indent(4, False) }}
   </main>
   <footer>
     <p>&copy; {{ author }} {{ year }}</p>
