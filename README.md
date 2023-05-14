@@ -1,2 +1,2 @@
-# static-site-generator
-My own static site generator written in Python.
+# MAD Static Site Generator
+Static site generator with live dev preview written in Python.
