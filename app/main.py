@@ -1,7 +1,6 @@
-from src import server, websocket, generator, observer
+from app import server, site_generator, observer
 
 if __name__ == '__main__':
     observer.run()
-    generator.build_site()
-    websocket.run()
+    site_generator.build_site()
     server.run()

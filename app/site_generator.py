@@ -1,5 +1,4 @@
 import os
-import xml
 
 import markdown
 import shutil
@@ -18,7 +17,7 @@ def build_site():
     build_start = time.perf_counter()
 
     # Clear the output directory
-    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
+    shutil.rmtree(OUTPUT_DIR)
     os.makedirs(OUTPUT_DIR)
 
     handle_conversions()
@@ -86,6 +85,6 @@ def inject_utils(filename, input_text):
     lines = input_text.split('\n')
     for line in lines:
         if line.__contains__('</body>'):
-            contents += line.split('<')[0] + '<script type=\'module\' src="/static/js/dev.js"></script>\n' + line + '\n'
+            contents += line.split('<')[0] + '<script type=\'module\' app="/static/js/dev.js"></script>\n' + line + '\n'
         else:
             contents += line + '\n'
