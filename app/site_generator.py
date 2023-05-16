@@ -17,7 +17,7 @@ def build_site():
     build_start = time.perf_counter()
 
     # Clear the output directory
-    shutil.rmtree(OUTPUT_DIR)
+    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
     os.makedirs(OUTPUT_DIR)
 
     handle_conversions()
@@ -34,7 +34,10 @@ def handle_conversions():
             markdown_input = read_file(os.path.join(INPUT_DIR, filename))
             metadata, html = convert_to_html(markdown_input)
             output_text = render(metadata, html)
-            inject_utils(filename, output_text)
+
+            if filename.split('.')[0] == 'index':
+                output_text = inject_utils(output_text)
+
             write_file(os.path.join(OUTPUT_DIR, filename.replace('.md', '.html')), output_text)
 
 
@@ -76,15 +79,14 @@ def render(metadata, html):
     return output_text
 
 
-def inject_utils(filename, input_text):
+def inject_utils(input_text):
     """Inject client-side development tools if in development mode"""
-    if filename.split('.')[0] != 'index':
-        return
-
     contents = ''
     lines = input_text.split('\n')
     for line in lines:
         if line.__contains__('</body>'):
-            contents += line.split('<')[0] + '<script type=\'module\' app="/static/js/dev.js"></script>\n' + line + '\n'
+            contents += line.split('<')[0] + '<script type=\'module\' src="js/dev.js"></script>\n' + line + '\n'
         else:
             contents += line + '\n'
+
+    return contents
