@@ -7,6 +7,6 @@ from app import web_server, site_generator, observer
 buffer_event = threading.Event()
 
 if __name__ == '__main__':
-    observer.run()
     site_generator.build_site()
+    observer.run()
     web_server.run()
