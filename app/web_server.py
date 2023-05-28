@@ -1,6 +1,6 @@
-import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
+from app.main import buffer_event
 from config import HOSTNAME, PORT, OUTPUT_DIR
 
 
@@ -16,11 +16,19 @@ class Server(SimpleHTTPRequestHandler):
             self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
             self.wfile.write(b'data: Initialising event stream\n\n')
-            while True:
-                self.wfile.write(b'data: ' + str(time.time()).encode() + b'\n\n')
-                time.sleep(10)
+            try:
+                self.handle_buffer()
+            except ConnectionAbortedError:
+                pass
         else:
             super().do_GET()
+
+    def handle_buffer(self):
+        buffer_event.wait(timeout=None)
+        self.wfile.write(b'data: refresh\n\n')
+
+        buffer_event.clear()
+        self.handle_buffer()
 
 
 def run():
