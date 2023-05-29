@@ -1,2 +1,2 @@
-# MAD Static Site Generator
-Static site generator with live dev preview written in Python.
+# JotunPy 
+Static site generator with live development preview written in Python.
