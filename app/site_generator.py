@@ -23,10 +23,14 @@ def build_site():
 
     handle_conversions()
     handle_copy()
-    sass.compile(
-        dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(STATIC_DIR, 'css')),
-        output_style='expanded'
-    )
+
+    try:
+        sass.compile(
+            dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(STATIC_DIR, 'css')),
+            output_style='expanded'
+        )
+    except sass.CompileError as e:
+        print(e)
 
     build_finish = time.perf_counter()
     print(f'Finished site build in {round(build_finish-build_start, 3)} second(s)')
