@@ -1,8 +1,9 @@
 import os
-
-import markdown
 import shutil
 import time
+
+import markdown
+import sass
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -22,6 +23,10 @@ def build_site():
 
     handle_conversions()
     handle_copy()
+    sass.compile(
+        dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(STATIC_DIR, 'css')),
+        output_style='expanded'
+    )
 
     build_finish = time.perf_counter()
     print(f'Finished site build in {round(build_finish-build_start, 3)} second(s)')
@@ -46,7 +51,8 @@ def handle_copy():
     for filename in os.listdir(STATIC_DIR):
         shutil.copytree(
             os.path.join(STATIC_DIR, filename),
-            os.path.join(OUTPUT_DIR, filename)
+            os.path.join(OUTPUT_DIR, filename),
+            ignore=shutil.ignore_patterns('*.scss')
         )
 
 
