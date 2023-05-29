@@ -1,6 +1,6 @@
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-from app.main import buffer_event
+from app import message
 from config import HOSTNAME, PORT, OUTPUT_DIR
 
 
@@ -24,10 +24,9 @@ class Server(SimpleHTTPRequestHandler):
             super().do_GET()
 
     def handle_buffer(self):
-        buffer_event.wait(timeout=None)
+        message.buffer_event.wait(timeout=None)
         self.wfile.write(b'data: refresh\n\n')
-
-        buffer_event.clear()
+        message.buffer_event.clear()
         self.handle_buffer()
 
 
