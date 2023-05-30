@@ -17,26 +17,18 @@ env = Environment(loader=FileSystemLoader('templates'))
 def build_site():
     build_start = time.perf_counter()
 
-    # Clear the output directory
     shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
     os.makedirs(OUTPUT_DIR)
 
-    handle_conversions()
-    handle_copy()
-
-    try:
-        sass.compile(
-            dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(STATIC_DIR, 'css')),
-            output_style='expanded'
-        )
-    except sass.CompileError as e:
-        print(e)
+    copy_scripts()
+    compile_sass()
+    convert_markdown()
 
     build_finish = time.perf_counter()
     print(f'Finished site build in {round(build_finish-build_start, 3)} second(s)')
 
 
-def handle_conversions():
+def convert_markdown():
     """Loop through input Markdown files and dispatch for conversion"""
     for filename in os.listdir(INPUT_DIR):
         if filename.endswith('.md'):
@@ -50,14 +42,28 @@ def handle_conversions():
             write_file(os.path.join(OUTPUT_DIR, filename.replace('.md', '.html')), output_text)
 
 
-def handle_copy():
+def copy_scripts():
     """Copy all static files to their appropriate directories"""
-    for filename in os.listdir(STATIC_DIR):
-        shutil.copytree(
-            os.path.join(STATIC_DIR, filename),
-            os.path.join(OUTPUT_DIR, filename),
-            ignore=shutil.ignore_patterns('*.scss')
+    scripts_src = os.path.join(STATIC_DIR, 'js')
+    scripts_dst = os.path.join(OUTPUT_DIR, 'js')
+    os.mkdir(scripts_dst)
+
+    for filename in os.listdir(scripts_src):
+        shutil.copyfile(
+            os.path.join(scripts_src, filename),
+            os.path.join(scripts_dst, filename),
+            follow_symlinks=True
         )
+
+
+def compile_sass():
+    try:
+        sass.compile(
+            dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(OUTPUT_DIR, 'css')),
+            output_style='expanded',
+        )
+    except sass.CompileError as e:
+        print(e)
 
 
 def convert_to_html(input_text):
