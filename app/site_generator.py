@@ -20,9 +20,9 @@ def build_site():
     shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
     os.makedirs(OUTPUT_DIR)
 
+    convert_markdown()
     copy_scripts()
     compile_sass()
-    convert_markdown()
 
     build_finish = time.perf_counter()
     print(f'Finished site build in {round(build_finish-build_start, 3)} second(s)')
