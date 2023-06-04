@@ -1,6 +1,6 @@
 ---
 title: My First Blog Post
-author: John Doe
+author: John Smith
 year: 2023
 template: post.html
 ---

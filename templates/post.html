@@ -6,11 +6,11 @@
     <link rel="stylesheet" href="/css/style.css" type="text/css">
   </head>
   <body>
+  <header>
+    <h1>{{ title }}</h1>
     {% filter indent(width=4,first=False) -%}
     {% include 'nav.html' %}
     {%- endfilter %}
-  <header>
-    <h1>{{ title }}</h1>
   </header>
   <main>
     {{ content|indent(4, False) }}

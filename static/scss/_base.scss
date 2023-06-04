@@ -1,2 +1,27 @@
 $primary-colour: rgb(255, 255, 255);
 $secondary-colour: rgb(25, 25, 25);
+$tertiary-colour: rgb(25, 25, 255);
+$separator-colour: rgb(220, 220, 220);
+
+@mixin heading-font-stack {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@mixin paragraph-font-stack {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@mixin space-around-and-center {
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+@mixin border-top-border-bottom {
+    border-top: 1px solid $separator-colour;
+    border-bottom: 1px solid $separator-colour;
+}

@@ -7,6 +7,7 @@ import sass
 
 from jinja2 import Environment, FileSystemLoader
 
+from app import html_editor
 from config import OUTPUT_DIR, INPUT_DIR, STATIC_DIR
 from util import read_file, write_file
 
@@ -17,29 +18,47 @@ env = Environment(loader=FileSystemLoader('templates'))
 def build_site():
     build_start = time.perf_counter()
 
-    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
-    os.makedirs(OUTPUT_DIR)
-
-    convert_markdown()
+    reset_dist()
+    convert_markdown(INPUT_DIR)
+    convert_markdown(os.path.join(INPUT_DIR, 'blog'))
     copy_scripts()
     compile_sass()
 
     build_finish = time.perf_counter()
-    print(f'Finished site build in {round(build_finish-build_start, 3)} second(s)')
+    print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
 
 
-def convert_markdown():
+def reset_dist():
+    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
+    os.makedirs(OUTPUT_DIR)
+    os.makedirs(os.path.join(OUTPUT_DIR, 'html', 'blog'))
+
+
+def convert_markdown(input_dir):
     """Loop through input Markdown files and dispatch for conversion"""
-    for filename in os.listdir(INPUT_DIR):
+    for filename in os.listdir(input_dir):
         if filename.endswith('.md'):
-            markdown_input = read_file(os.path.join(INPUT_DIR, filename))
+            markdown_input = read_file(os.path.join(input_dir, filename))
             metadata, html = convert_to_html(markdown_input)
             output_text = render(metadata, html)
 
             if filename.split('.')[0] == 'index':
-                output_text = inject_utils(output_text)
+                output_text = add_utils(output_text)  # Add development mode utility files
+                output_text = add_posts(output_text)  # Show a shortcut to the latest blog posts on the main page
+            write_dir = determine_html_subdir(metadata)
+            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), output_text)
 
-            write_file(os.path.join(OUTPUT_DIR, filename.replace('.md', '.html')), output_text)
+
+def collect_posts():
+    """Collects all Markdown blog files and creates a string of hyperlinks to each of their HTML generated variants"""
+    contents = ''
+    ext = 'html'
+    for filename in os.listdir(os.path.join(INPUT_DIR, 'blog')):
+        name = filename.split('.')[0]
+        contents += f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
+                    f'{name.title().replace("-", " ")}' \
+                    f'</a>'
+    return contents
 
 
 def copy_scripts():
@@ -57,9 +76,12 @@ def copy_scripts():
 
 
 def compile_sass():
+    input_dir = os.path.join(STATIC_DIR, 'scss')
+    output_dir = os.path.join(OUTPUT_DIR, 'css')
+
     try:
         sass.compile(
-            dirname=(os.path.join(STATIC_DIR, 'scss'), os.path.join(OUTPUT_DIR, 'css')),
+            dirname=(input_dir, output_dir),
             output_style='expanded',
         )
     except sass.CompileError as e:
@@ -82,7 +104,7 @@ def convert_to_html(input_text):
             metadata[parts[0].strip()] = parts[1].strip()
 
     # Parse input text to HTML
-    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]))
+    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), extensions=['nl2br'])
 
     return metadata, html
 
@@ -95,14 +117,32 @@ def render(metadata, html):
     return output_text
 
 
-def inject_utils(input_text):
-    """Inject client-side development tools if in development mode"""
-    contents = ''
-    lines = input_text.split('\n')
-    for line in lines:
-        if line.__contains__('</body>'):
-            contents += line.split('<')[0] + '<script type=\'module\' src="js/dev.js"></script>\n' + line + '\n'
-        else:
-            contents += line + '\n'
+def add_posts(input_text):
+    """Collect all blog posts and add hyperlinks"""
+    editor = html_editor.HtmlEditor(
+        html=input_text,
+        anchor='<ul class=\'post-list\'>',
+        element=collect_posts(),
+        prepend=False
+    )
+    return editor.add_html()
 
-    return contents
+
+def add_utils(input_text):
+    """Inject client-side development tools if in development mode"""
+    editor = html_editor.HtmlEditor(
+        html=input_text,
+        anchor='</body>',
+        element='<script type=\'module\' src="js/dev.js"></script>\n',
+        prepend=True
+    )
+    return editor.add_html()
+
+
+def determine_html_subdir(metadata):
+    if metadata.get('template') == 'post.html':
+        return os.path.join(OUTPUT_DIR, 'html', 'blog')
+    elif metadata.get('template') != 'default.html':
+        return os.path.join(OUTPUT_DIR, 'html')
+    else:
+        return OUTPUT_DIR

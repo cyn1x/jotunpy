@@ -3,7 +3,7 @@ import time
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from app import message
+from app import message, util
 from config import INPUT_DIR, TEMPLATE_DIR, STATIC_DIR
 from site_generator import build_site
 
@@ -23,6 +23,7 @@ class BuildEventHandler(PatternMatchingEventHandler):
         if key in self.file_cache:
             return
         self.file_cache[key] = True
+        util.clear_terminal()
         build_site()
         message.buffer_event.set()
 

@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>{{ title }}</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/css/style.css" type="text/css" />
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
   </head>
   <body>
   <header>
@@ -13,9 +13,7 @@
     {%- endfilter %}
   </header>
   <main>
-    {% filter indent(width=4,first=False) -%}
-    {% include 'posts.html' %}
-    {%- endfilter %}
+    {{ content|indent(4, False) }}
   </main>
   <footer>
     {% filter indent(width=4,first=False) -%}
