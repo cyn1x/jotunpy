@@ -1,13 +1,13 @@
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from app import message
-from config import HOSTNAME, PORT, OUTPUT_DIR
+from util import config
 
 
 class Server(SimpleHTTPRequestHandler):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=OUTPUT_DIR, **kwargs)
+        super().__init__(*args, directory=config['IO']['OUTPUT_DIR'], **kwargs)
 
     def do_GET(self):
         if self.path == '/events':
@@ -31,12 +31,12 @@ class Server(SimpleHTTPRequestHandler):
 
 
 def run():
-    server_address = (HOSTNAME, PORT)
+    server_address = (config['SERVER']['HOSTNAME'], int(config['SERVER']['PORT']))
     # `ThreadingHTTPServer` is used as `HTTPServer` hangs on keyboard interrupt after the first client is served.
     httpd = ThreadingHTTPServer(server_address, Server)
 
     try:
-        print(f'Server running at http://{HOSTNAME}:{PORT}')
+        print(f'Server running at http://{config["SERVER"]["HOSTNAME"]}:{config["SERVER"]["PORT"]}')
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass

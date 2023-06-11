@@ -8,8 +8,7 @@ import sass
 from jinja2 import Environment, FileSystemLoader
 
 from app import html_editor
-from config import OUTPUT_DIR, INPUT_DIR, STATIC_DIR
-from util import read_file, write_file
+from util import config, read_file, write_file
 
 # Define the Jinja2 environment and file system loader
 env = Environment(loader=FileSystemLoader('templates'))
@@ -19,8 +18,8 @@ def build_site():
     build_start = time.perf_counter()
 
     reset_dist()
-    convert_markdown(INPUT_DIR)
-    convert_markdown(os.path.join(INPUT_DIR, 'blog'))
+    convert_markdown(config['IO']['INPUT_DIR'])
+    convert_markdown(os.path.join(config['IO']['INPUT_DIR'], 'blog'))
     copy_scripts()
     compile_sass()
 
@@ -29,9 +28,9 @@ def build_site():
 
 
 def reset_dist():
-    shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
-    os.makedirs(OUTPUT_DIR)
-    os.makedirs(os.path.join(OUTPUT_DIR, 'html', 'blog'))
+    shutil.rmtree(config['IO']['OUTPUT_DIR'], ignore_errors=True)
+    os.makedirs(config['IO']['OUTPUT_DIR'])
+    os.makedirs(os.path.join(config['IO']['OUTPUT_DIR'], 'html', 'blog'))
 
 
 def convert_markdown(input_dir):
@@ -53,7 +52,7 @@ def collect_posts():
     """Collects all Markdown blog files and creates a string of hyperlinks to each of their HTML generated variants"""
     contents = ''
     ext = 'html'
-    for filename in os.listdir(os.path.join(INPUT_DIR, 'blog')):
+    for filename in os.listdir(os.path.join(config['IO']['INPUT_DIR'], 'blog')):
         name = filename.split('.')[0]
         contents += f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
                     f'{name.title().replace("-", " ")}' \
@@ -63,8 +62,8 @@ def collect_posts():
 
 def copy_scripts():
     """Copy all static files to their appropriate directories"""
-    scripts_src = os.path.join(STATIC_DIR, 'js')
-    scripts_dst = os.path.join(OUTPUT_DIR, 'js')
+    scripts_src = os.path.join(config['IO']['STATIC_DIR'], 'js')
+    scripts_dst = os.path.join(config['IO']['OUTPUT_DIR'], 'js')
     os.mkdir(scripts_dst)
 
     for filename in os.listdir(scripts_src):
@@ -76,8 +75,8 @@ def copy_scripts():
 
 
 def compile_sass():
-    input_dir = os.path.join(STATIC_DIR, 'scss')
-    output_dir = os.path.join(OUTPUT_DIR, 'css')
+    input_dir = os.path.join(config['IO']['STATIC_DIR'], 'scss')
+    output_dir = os.path.join(config['IO']['OUTPUT_DIR'], 'css')
 
     try:
         sass.compile(
@@ -141,8 +140,8 @@ def add_utils(input_text):
 
 def determine_html_subdir(metadata):
     if metadata.get('template') == 'post.html':
-        return os.path.join(OUTPUT_DIR, 'html', 'blog')
+        return os.path.join(config['IO']['OUTPUT_DIR'], 'html', 'blog')
     elif metadata.get('template') != 'default.html':
-        return os.path.join(OUTPUT_DIR, 'html')
+        return os.path.join(config['IO']['OUTPUT_DIR'], 'html')
     else:
-        return OUTPUT_DIR
+        return config['IO']['OUTPUT_DIR']

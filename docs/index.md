@@ -4,4 +4,3 @@ author: John Smith
 year: 2023
 template: default.html
 ---
-
