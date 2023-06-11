@@ -20,11 +20,17 @@ def build_site():
     reset_dist()
     convert_markdown(config['IO']['INPUT_DIR'])
     convert_markdown(os.path.join(config['IO']['INPUT_DIR'], 'blog'))
-    copy_scripts()
+    copy_static_files('js')
+    copy_static_files('img')
     compile_sass()
 
     build_finish = time.perf_counter()
     print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
+
+
+def bundle_site():
+    config['IO']['OUTPUT_DIR'] = config['IO']['BUILD_DIR']
+    build_site()
 
 
 def reset_dist():
@@ -60,10 +66,10 @@ def collect_posts():
     return contents
 
 
-def copy_scripts():
+def copy_static_files(ext):
     """Copy all static files to their appropriate directories"""
-    scripts_src = os.path.join(config['IO']['STATIC_DIR'], 'js')
-    scripts_dst = os.path.join(config['IO']['OUTPUT_DIR'], 'js')
+    scripts_src = os.path.join(config['IO']['STATIC_DIR'], ext)
+    scripts_dst = os.path.join(config['IO']['OUTPUT_DIR'], ext)
     os.mkdir(scripts_dst)
 
     for filename in os.listdir(scripts_src):
