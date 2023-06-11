@@ -28,11 +28,6 @@ def build_site():
     print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
 
 
-def bundle_site():
-    config['IO']['OUTPUT_DIR'] = config['IO']['BUILD_DIR']
-    build_site()
-
-
 def reset_dist():
     shutil.rmtree(config['IO']['OUTPUT_DIR'], ignore_errors=True)
     os.makedirs(config['IO']['OUTPUT_DIR'])
@@ -48,8 +43,10 @@ def convert_markdown(input_dir):
             output_text = render(metadata, html)
 
             if filename.split('.')[0] == 'index':
-                output_text = add_utils(output_text)  # Add development mode utility files
                 output_text = add_posts(output_text)  # Show a shortcut to the latest blog posts on the main page
+            if bool(config['DEFAULT'].getboolean('CLIENT_SIDE_ROUTING')) is False:
+                output_text = add_utils(output_text)  # Add development mode utility files
+
             write_dir = determine_html_subdir(metadata)
             write_file(os.path.join(write_dir, filename.replace('.md', '.html')), output_text)
 
@@ -138,7 +135,7 @@ def add_utils(input_text):
     editor = html_editor.HtmlEditor(
         html=input_text,
         anchor='</body>',
-        element='<script type=\'module\' src="js/dev.js"></script>\n',
+        element=f'<script type=\'module\' src="/js/dev.js"></script>\n',
         prepend=True
     )
     return editor.add_html()
