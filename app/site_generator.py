@@ -8,7 +8,8 @@ import sass
 from jinja2 import Environment, FileSystemLoader
 
 from app import html_editor
-from util import config, read_file, write_file
+from app.config import CONFIG
+from util import read_file, write_file
 
 # Define the Jinja2 environment and file system loader
 env = Environment(loader=FileSystemLoader('templates'))
@@ -16,10 +17,11 @@ env = Environment(loader=FileSystemLoader('templates'))
 
 def build_site():
     build_start = time.perf_counter()
+    posts = collect_posts()
 
     reset_dist()
-    convert_markdown(config['IO']['INPUT_DIR'])
-    convert_markdown(os.path.join(config['IO']['INPUT_DIR'], 'blog'))
+    convert_markdown(CONFIG['IO']['INPUT_DIR'], posts)
+    convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'), posts)
     copy_static_files('js')
     copy_static_files('img')
     compile_sass()
@@ -29,44 +31,37 @@ def build_site():
 
 
 def reset_dist():
-    shutil.rmtree(config['IO']['OUTPUT_DIR'], ignore_errors=True)
-    os.makedirs(config['IO']['OUTPUT_DIR'])
-    os.makedirs(os.path.join(config['IO']['OUTPUT_DIR'], 'html', 'blog'))
+    shutil.rmtree(CONFIG['IO']['OUTPUT_DIR'], ignore_errors=True)
+    os.makedirs(CONFIG['IO']['OUTPUT_DIR'])
+    os.makedirs(os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog'))
 
 
-def convert_markdown(input_dir):
+def convert_markdown(input_dir, post_list):
     """Loop through input Markdown files and dispatch for conversion"""
     for filename in os.listdir(input_dir):
         if filename.endswith('.md'):
             markdown_input = read_file(os.path.join(input_dir, filename))
             metadata, html = convert_to_html(markdown_input)
             output_text = render(metadata, html)
-
-            if filename.split('.')[0] == 'index':
-                output_text = add_posts(output_text)  # Show a shortcut to the latest blog posts on the main page
-            if bool(config['DEFAULT'].getboolean('CLIENT_SIDE_ROUTING')) is False:
-                output_text = add_utils(output_text)  # Add development mode utility files
-
+            amended_output_text = inject_html(output_text, post_list)
             write_dir = determine_html_subdir(metadata)
-            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), output_text)
+            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), amended_output_text)
 
 
-def collect_posts():
-    """Collects all Markdown blog files and creates a string of hyperlinks to each of their HTML generated variants"""
-    contents = ''
-    ext = 'html'
-    for filename in os.listdir(os.path.join(config['IO']['INPUT_DIR'], 'blog')):
-        name = filename.split('.')[0]
-        contents += f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
-                    f'{name.title().replace("-", " ")}' \
-                    f'</a>'
-    return contents
+def inject_html(output_text, post_list):
+    """Checks for a post list target element to insert a list of posts and injects dev utilities if using the server"""
+    updated_html = add_posts(output_text, post_list)  # Show a shortcut to the latest blog posts
+    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True \
+            and bool(CONFIG['SETTINGS'].getboolean('CLIENT_SIDE_ROUTING')) is False:
+        updated_html = add_utils(updated_html)  # Add development mode utility files
+
+    return updated_html
 
 
 def copy_static_files(ext):
     """Copy all static files to their appropriate directories"""
-    scripts_src = os.path.join(config['IO']['STATIC_DIR'], ext)
-    scripts_dst = os.path.join(config['IO']['OUTPUT_DIR'], ext)
+    scripts_src = os.path.join(CONFIG['IO']['STATIC_DIR'], ext)
+    scripts_dst = os.path.join(CONFIG['IO']['OUTPUT_DIR'], ext)
     os.mkdir(scripts_dst)
 
     for filename in os.listdir(scripts_src):
@@ -78,13 +73,19 @@ def copy_static_files(ext):
 
 
 def compile_sass():
-    input_dir = os.path.join(config['IO']['STATIC_DIR'], 'scss')
-    output_dir = os.path.join(config['IO']['OUTPUT_DIR'], 'css')
+    input_dir = os.path.join(CONFIG['IO']['STATIC_DIR'], 'scss')
+    output_dir = os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'css')
+
+    style = ''
+    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
+        style = 'expanded'
+    else:
+        style = CONFIG['SETTINGS']['CSS_OUTPUT_STYLE']
 
     try:
         sass.compile(
             dirname=(input_dir, output_dir),
-            output_style='expanded',
+            output_style=style,
         )
     except sass.CompileError as e:
         print(e)
@@ -119,12 +120,12 @@ def render(metadata, html):
     return output_text
 
 
-def add_posts(input_text):
+def add_posts(input_text, post_list):
     """Collect all blog posts and add hyperlinks"""
     editor = html_editor.HtmlEditor(
         html=input_text,
-        anchor='<ul class=\'post-list\'>',
-        element=collect_posts(),
+        anchor=CONFIG['SETTINGS']['POST_LIST_TARGET'],
+        element=post_list,
         prepend=False
     )
     return editor.add_html()
@@ -141,10 +142,22 @@ def add_utils(input_text):
     return editor.add_html()
 
 
+def collect_posts():
+    """Collects all Markdown blog files and creates a string of hyperlinks to each of their HTML generated variants"""
+    contents = ''
+    ext = 'html'
+    for filename in os.listdir(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog')):
+        name = filename.split('.')[0]
+        contents += f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
+                    f'{name.title().replace("-", " ")}' \
+                    f'</a>'
+    return contents
+
+
 def determine_html_subdir(metadata):
     if metadata.get('template') == 'post.html':
-        return os.path.join(config['IO']['OUTPUT_DIR'], 'html', 'blog')
+        return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog')
     elif metadata.get('template') != 'default.html':
-        return os.path.join(config['IO']['OUTPUT_DIR'], 'html')
+        return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html')
     else:
-        return config['IO']['OUTPUT_DIR']
+        return CONFIG['IO']['OUTPUT_DIR']

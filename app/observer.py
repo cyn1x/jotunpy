@@ -3,9 +3,9 @@ import time
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from app import message
+from app.config import CONFIG
+from app.event import BUFFER_EVENT
 from site_generator import build_site
-from util import config
 
 
 # Define the event handler that watches for changes to files
@@ -24,7 +24,7 @@ class BuildEventHandler(PatternMatchingEventHandler):
             return
         self.file_cache[key] = True
         build_site()
-        message.buffer_event.set()
+        BUFFER_EVENT.set()
 
 
 def run():
@@ -33,9 +33,9 @@ def run():
 
     # Create an observer to watch for changes to files
     observer = Observer()
-    observer.schedule(event_handler, config['IO']['INPUT_DIR'], recursive=True)
-    observer.schedule(event_handler, config['IO']['TEMPLATE_DIR'], recursive=True)
-    observer.schedule(event_handler, config['IO']['STATIC_DIR'], recursive=True)
+    observer.schedule(event_handler, CONFIG['IO']['INPUT_DIR'], recursive=True)
+    observer.schedule(event_handler, CONFIG['IO']['TEMPLATE_DIR'], recursive=True)
+    observer.schedule(event_handler, CONFIG['IO']['STATIC_DIR'], recursive=True)
 
     # Start the observer
     observer.start()

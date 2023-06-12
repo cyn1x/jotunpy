@@ -16,7 +16,9 @@
     {{ content|indent(4, False) }}
   </main>
   <footer>
-    <p>&copy; {{ author }} {{ year }}</p>
+    {% filter indent(width=4,first=False) -%}
+    {% include 'footer.html' %}
+    {%- endfilter %}
   </footer>
   </body>
 </html>
