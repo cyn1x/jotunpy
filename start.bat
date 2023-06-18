@@ -8,11 +8,11 @@ set "ENVIRONMENT="
 set "VALID="
 IF "%~1"=="-h" goto :printUsage
 IF "%~1"=="--help" goto :printUsage
-IF "%~1"=="--dev" (
+IF "%~1"=="dev" (
     set VALID=1
     set ENVIRONMENT=DEVELOPMENT
 )
-IF "%~1"=="--build" (
+IF "%~1"=="build" (
     set VALID=1
     set ENVIRONMENT=PRODUCTION
 )
