@@ -7,8 +7,7 @@ from core.config import CONFIG, update_config
 
 parser = argparse.ArgumentParser(
     prog='JotunPy',
-    description='Static site generator and development server',
-    epilog='Text at the bottom of help')
+    description='Static site generator and development server')
 
 subparsers = parser.add_subparsers(help='sub command help')
 subparsers.required = True
