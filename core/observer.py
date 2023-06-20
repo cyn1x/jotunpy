@@ -3,9 +3,9 @@ import time
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from app.config import CONFIG
-from app.event import BUFFER_EVENT
-from site_generator import build_site
+from core.config import CONFIG
+from core.event import BUFFER_EVENT
+from core.site_generator import build_site
 
 
 # Define the event handler that watches for changes to files

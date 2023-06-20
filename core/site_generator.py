@@ -7,9 +7,9 @@ import sass
 
 from jinja2 import Environment, FileSystemLoader
 
-from app import html_editor
-from app.config import CONFIG
-from util import read_file, write_file
+from core import html_editor
+from core.config import CONFIG
+from core.util import read_file, write_file
 
 # Define the Jinja2 environment and file system loader
 env = Environment(loader=FileSystemLoader('templates'))

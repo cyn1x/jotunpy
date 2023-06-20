@@ -1,7 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-from app.config import CONFIG
-from app.event import BUFFER_EVENT
+from core.config import CONFIG
+from core.event import BUFFER_EVENT
 
 
 class Server(SimpleHTTPRequestHandler):
