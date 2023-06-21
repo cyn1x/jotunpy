@@ -20,6 +20,8 @@ def build_site():
     posts = collect_posts()
 
     reset_dist()
+    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
+        copy_utils()
     convert_markdown(CONFIG['IO']['INPUT_DIR'], posts)
     convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'), posts)
     copy_static_files('js')
@@ -58,16 +60,23 @@ def inject_html(output_text, post_list):
     return updated_html
 
 
+def copy_utils():
+    shutil.copytree(
+        '.data',
+        os.path.join(CONFIG['IO']['OUTPUT_DIR'], '.data')
+    )
+
+
 def copy_static_files(ext):
     """Copy all static files to their appropriate directories"""
-    scripts_src = os.path.join(CONFIG['IO']['STATIC_DIR'], ext)
-    scripts_dst = os.path.join(CONFIG['IO']['OUTPUT_DIR'], ext)
-    os.mkdir(scripts_dst)
+    src = os.path.join(CONFIG['IO']['STATIC_DIR'], ext)
+    dst = os.path.join(CONFIG['IO']['OUTPUT_DIR'], ext)
+    os.mkdir(dst)
 
-    for filename in os.listdir(scripts_src):
+    for filename in os.listdir(src):
         shutil.copyfile(
-            os.path.join(scripts_src, filename),
-            os.path.join(scripts_dst, filename),
+            os.path.join(src, filename),
+            os.path.join(dst, filename),
             follow_symlinks=True
         )
 
@@ -136,7 +145,7 @@ def add_utils(input_text):
     editor = html_editor.HtmlEditor(
         html=input_text,
         anchor='</body>',
-        element=f'<script type=\'module\' src="/js/dev.js"></script>\n',
+        element=f'<script type=\'module\' src=".data/scripts/dev.js"></script>\n',
         prepend=True
     )
     return editor.add_html()

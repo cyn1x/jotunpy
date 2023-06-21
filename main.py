@@ -46,7 +46,7 @@ def start_build(opts):
 
 def start_new(opts):
     """Generates project files in an empty directory"""
-    os.mkdir(opts.output_dir)
+    shutil.copytree('.data', os.path.join(opts.output_dir, '.data'))
     shutil.copytree(CONFIG['IO']['INPUT_DIR'], os.path.join(opts.output_dir, 'docs'))
     shutil.copytree(CONFIG['IO']['TEMPLATE_DIR'], os.path.join(opts.output_dir, 'templates'))
     shutil.copytree(CONFIG['IO']['STATIC_DIR'], os.path.join(opts.output_dir, 'static'))
