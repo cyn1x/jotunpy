@@ -6,7 +6,7 @@ from core import web_server, site_generator, observer
 from core.config import CONFIG, update_config
 
 parser = argparse.ArgumentParser(
-    prog='JotunPy',
+    prog='main.py',
     description='Static site generator and development server')
 
 subparsers = parser.add_subparsers(help='sub command help')
