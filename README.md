@@ -47,7 +47,7 @@ python ..\jotunpy\main.py dev
 The `-h` or `--help` flag shows information on all of the available options.
 ```commandline
 > python main.py -h
-usage: JotunPy [-h] {dev,build,new} ...
+usage: main.py [-h] {dev,build,new} ...
 
 Static site generator and development server
 
@@ -60,10 +60,10 @@ positional arguments:
 options:
   -h, --help       show this help message and exit
 ```
-Similarly, each sub command contains useful information for any optional arguments.
+Similarly, each sub command contains useful help information for any optional arguments.
 ```commandline
->python main.py dev -h
-usage: JotunPy dev [-h] [-p PORT]
+> python main.py dev -h
+usage: main.py dev [-h] [-p PORT]
 
 options:
   -h, --help            show this help message and exit
