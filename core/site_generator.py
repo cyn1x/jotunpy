@@ -5,7 +5,7 @@ import time
 import markdown
 import sass
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, exceptions
 
 from core import html_editor
 from core.config import CONFIG
@@ -124,9 +124,13 @@ def convert_to_html(input_text):
 def render(metadata, html):
     """Use Jinja2 to render the HTML template with the Markdown content"""
     template = env.get_template(metadata.get('template', 'default.html'))
-    output_text = template.render(content=html, **metadata)
 
-    return output_text
+    try:
+        output_text = template.render(content=html, **metadata)
+        return output_text
+    except exceptions.TemplateNotFound as e:
+        print(f'jinja2.exceptions.TemplateNotFound: {e}')
+        exit(1)
 
 
 def add_posts(input_text, post_list):
