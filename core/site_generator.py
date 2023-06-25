@@ -20,7 +20,7 @@ def build_site():
     posts = collect_posts()
 
     reset_dist()
-    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
+    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
         copy_utils()
     convert_markdown(CONFIG['IO']['INPUT_DIR'], posts)
     convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'), posts)
@@ -45,19 +45,20 @@ def convert_markdown(input_dir, post_list):
             markdown_input = read_file(os.path.join(input_dir, filename))
             metadata, html = convert_to_html(markdown_input)
             output_text = render(metadata, html)
-            amended_output_text = inject_html(output_text, post_list)
+            output_text = add_posts(output_text, post_list)  # Show a shortcut to the latest blog posts
+            output_text = inject_dev_utils(output_text, filename)
             write_dir = determine_html_subdir(metadata)
-            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), amended_output_text)
+            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), output_text)
 
 
-def inject_html(output_text, post_list):
+def inject_dev_utils(output_text, filename):
     """Checks for a post list target element to insert a list of posts and injects dev utilities if using the server"""
-    updated_html = add_posts(output_text, post_list)  # Show a shortcut to the latest blog posts
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True \
-            and bool(CONFIG['SETTINGS'].getboolean('CLIENT_SIDE_ROUTING')) is False:
-        updated_html = add_utils(updated_html)  # Add development mode utility files
+            and (bool(CONFIG['SETTINGS'].getboolean('CLIENT_SIDE_ROUTING')) is False
+                 or filename.split('.')[0] == 'index'):
+        output_text = add_utils(output_text)  # Add development mode utility files
 
-    return updated_html
+    return output_text
 
 
 def copy_utils():
@@ -85,7 +86,6 @@ def compile_sass():
     input_dir = os.path.join(CONFIG['IO']['STATIC_DIR'], 'scss')
     output_dir = os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'css')
 
-    style = ''
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
         style = 'expanded'
     else:
@@ -145,7 +145,7 @@ def add_utils(input_text):
     editor = html_editor.HtmlEditor(
         html=input_text,
         anchor='</body>',
-        element=f'<script type=\'module\' src=".data/scripts/dev.js"></script>\n',
+        element=f'<script type=\'module\' src="/.data/scripts/dev.js"></script>\n',
         prepend=True
     )
     return editor.add_html()
