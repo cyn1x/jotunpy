@@ -170,7 +170,7 @@ def collect_posts():
 def determine_html_subdir(metadata):
     if metadata.get('template') == 'post.html':
         return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog')
-    elif metadata.get('template') != 'default.html':
+    elif metadata.get('template') != 'index.html':
         return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html')
     else:
         return CONFIG['IO']['OUTPUT_DIR']

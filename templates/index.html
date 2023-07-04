@@ -16,7 +16,9 @@
     {%- endfilter %}
   </header>
   <main>
-    {{ content|indent(4, False) }}
+    {% filter indent(width=4,first=False) -%}
+    {% include 'posts.html' %}
+    {%- endfilter %}
   </main>
   <footer>
     {% filter indent(width=4,first=False) -%}
