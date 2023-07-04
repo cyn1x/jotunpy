@@ -72,14 +72,8 @@ def copy_static_files(ext):
     """Copy all static files to their appropriate directories"""
     src = os.path.join(CONFIG['IO']['STATIC_DIR'], ext)
     dst = os.path.join(CONFIG['IO']['OUTPUT_DIR'], ext)
-    os.mkdir(dst)
 
-    for filename in os.listdir(src):
-        shutil.copyfile(
-            os.path.join(src, filename),
-            os.path.join(dst, filename),
-            follow_symlinks=True
-        )
+    shutil.copytree(src, dst)
 
 
 def compile_sass():

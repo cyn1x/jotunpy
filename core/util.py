@@ -18,6 +18,6 @@ def read_file(file):
 
 
 def write_file(file, contents):
-    f = open(file, 'w')
+    f = open(file, 'w', encoding="utf-8")
     f.write(contents)
     f.close()
