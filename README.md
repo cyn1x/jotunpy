@@ -44,7 +44,7 @@ python ..\jotunpy\main.py dev
 
 ### Help
 
-The `-h` or `--help` flag shows information on all of the available options.
+The `-h` or `--help` flag shows information on all the available options.
 ```commandline
 > python main.py -h
 usage: main.py [-h] {dev,build,new} ...
@@ -71,8 +71,27 @@ options:
 ```
 
 ### Configuration
+JotunPy supports application specific configurations through a `config.ini` file, and environment variable loading 
+through a `config.yaml` file.
 
-Most of the important settings are stored in the `config.ini` file in the root directory of the directory where the 
-new project was created. The `CLIENT_SIDE_ROUTING` key indicates whether a JavaScript based router will be used for 
-client-side rendering. The default value is `No` to ensure the development utilities are injected into all HTML files 
-unless otherwise specified.
+#### INI
+
+The INI file is used for application specific settings. Most of the important settings are stored in the `config.ini` 
+file in the root directory of the directory where the new project was created. The `CLIENT_SIDE_ROUTING` key indicates 
+whether a JavaScript based router will be used for client-side rendering. The default value is `No` to ensure the 
+development utilities are injected into all HTML files unless otherwise specified.
+
+#### YAML
+
+The YAML configuration file is used for loading environment variables into the application's runtime. An example of 
+its usefulness can be demonstrated with non-sensitive information like separate API URIs depending on whether a 
+site build is triggered for production, or live development preview is enabled for site development.
+
+```yaml
+development: {
+  key: 'value'
+}
+production: {
+  key: 'value'
+}
+```
