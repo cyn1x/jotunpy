@@ -8,7 +8,7 @@ import sass
 from jinja2 import Environment, FileSystemLoader, exceptions
 
 from core import html_editor
-from core.config import CONFIG
+from core.config import CONFIG, import_env
 from core.util import read_file, write_file
 
 # Define the Jinja2 environment and file system loader
@@ -118,9 +118,10 @@ def convert_to_html(input_text):
 def render(metadata, html):
     """Use Jinja2 to render the HTML template with the Markdown content"""
     template = env.get_template(metadata.get('template', 'default.html'))
+    env_vars = import_env()[os.environ['ENVIRONMENT'].lower()]
 
     try:
-        output_text = template.render(content=html, **metadata)
+        output_text = template.render(content=html, **metadata, **env_vars)
         return output_text
     except exceptions.TemplateNotFound as e:
         print(f'jinja2.exceptions.TemplateNotFound: {e}')

@@ -15,6 +15,7 @@ subparsers.required = True
 
 def start_dev(opts):
     """Starts the development server"""
+    os.environ['ENVIRONMENT'] = 'DEVELOPMENT'
     if opts.port is not None:
         update_config("SERVER.PORT", opts.port)
 
@@ -51,6 +52,7 @@ def start_new(opts):
     shutil.copytree(CONFIG['IO']['TEMPLATE_DIR'], os.path.join(opts.output_dir, 'templates'))
     shutil.copytree(CONFIG['IO']['STATIC_DIR'], os.path.join(opts.output_dir, 'static'))
     shutil.copyfile('config.ini', os.path.join(opts.output_dir, 'config.ini'))
+    shutil.copyfile('config.yaml', os.path.join(opts.output_dir, 'config.yaml'))
     print(f'New project created successfully in {opts.output_dir}')
 
 

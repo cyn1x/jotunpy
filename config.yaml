@@ -1,0 +1,7 @@
+# Set environment variables to be loaded into Jinja2 variables
+development: {
+  devenv: development
+}
+production: {
+  devenv: production
+}
