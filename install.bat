@@ -33,7 +33,8 @@ if %errorlevel% equ 0 (
     )
 
 :success
-    echo Run start.bat to start the development server
-    echo Run build.bat to build the site for deployment
+    echo Run `venv\Scripts\activate` to activate the virtual environment
+    echo Run `python main.py -h` to see the available help information
+    echo Read the README at https://github.com/cyn1x/jotunpy for further information
 
 endlocal
