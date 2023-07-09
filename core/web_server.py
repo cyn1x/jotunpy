@@ -1,3 +1,4 @@
+import os
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from core.config import CONFIG
@@ -21,6 +22,13 @@ class Server(SimpleHTTPRequestHandler):
             except ConnectionAbortedError:
                 pass
         else:
+            if CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']:
+                # Check if the requested path points to a file
+                file_path = self.translate_path(self.path)
+                if os.path.isfile(file_path):
+                    return super().do_GET()
+                # Serve index.html for all other paths
+                self.path = '/index.html'
             super().do_GET()
 
     def handle_buffer(self):
