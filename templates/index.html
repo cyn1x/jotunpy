@@ -16,9 +16,11 @@
     {%- endfilter %}
   </header>
   <main>
-    {% filter indent(width=4,first=False) -%}
-    {% include 'posts.html' %}
-    {%- endfilter %}
+    <h2>Posts</h2>
+    <br>
+    <ul class="post-list"></ul>
+    <br>
+    <p>Subscribe <a href="#">via RSS!</a></p>
   </main>
   <footer>
     {% filter indent(width=4,first=False) -%}

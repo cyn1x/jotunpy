@@ -17,13 +17,12 @@ env = Environment(loader=FileSystemLoader('templates'))
 
 def build_site():
     build_start = time.perf_counter()
-    posts = collect_posts()
 
     reset_dist()
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
         copy_utils()
-    convert_markdown(CONFIG['IO']['INPUT_DIR'], posts)
-    convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'), posts)
+    convert_markdown(CONFIG['IO']['INPUT_DIR'])
+    convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'))
     copy_static_files('js')
     copy_static_files('img')
     compile_sass()
@@ -38,24 +37,28 @@ def reset_dist():
     os.makedirs(os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog'))
 
 
-def convert_markdown(input_dir, post_list):
+def convert_markdown(input_dir):
     """Loop through input Markdown files and dispatch for conversion"""
     for filename in os.listdir(input_dir):
         if filename.endswith('.md'):
             markdown_input = read_file(os.path.join(input_dir, filename))
-            metadata, html = convert_to_html(markdown_input)
-            output_text = render(metadata, html)
-            output_text = add_posts(output_text, post_list)  # Show a shortcut to the latest blog posts
-            output_text = inject_dev_utils(output_text, filename)
+            metadata, html = convert_to_html(markdown_input)  # Convert Markdown to HTML
+            html_document = render(metadata, html)  # Render HTML document
+
+            output_text = ''
+            if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
+                output_text = inject_dev_utils(html_document, filename)  # Inject dev utilities if using the server
+            if filename.split('.')[0] == CONFIG['SETTINGS']['BLOG_HOMEPAGE'].split('.')[0]:
+                output_text = add_posts(html_document)  # Show a shortcut to the latest blog posts
+
             write_dir = determine_html_subdir(metadata)
-            write_file(os.path.join(write_dir, filename.replace('.md', '.html')), output_text)
+            write_file(os.path.join(write_dir, filename.replace('.md', '.html')),
+                       output_text if output_text else html_document)
 
 
 def inject_dev_utils(output_text, filename):
     """Checks for a post list target element to insert a list of posts and injects dev utilities if using the server"""
-    if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True \
-            and (bool(CONFIG['SETTINGS'].getboolean('CLIENT_SIDE_ROUTING')) is False
-                 or filename.split('.')[0] == 'index'):
+    if bool(CONFIG['SETTINGS'].getboolean('CLIENT_SIDE_ROUTING')) is False or filename.split('.')[0] == 'index':
         output_text = add_utils(output_text)  # Add development mode utility files
 
     return output_text
@@ -128,12 +131,13 @@ def render(metadata, html):
         exit(1)
 
 
-def add_posts(input_text, post_list):
+def add_posts(input_text):
     """Collect all blog posts and add hyperlinks"""
+    posts = collect_posts()
     editor = html_editor.HtmlEditor(
         html=input_text,
         anchor=CONFIG['SETTINGS']['POST_LIST_TARGET'],
-        element=post_list,
+        element=posts,
         prepend=False
     )
     return editor.add_html()
