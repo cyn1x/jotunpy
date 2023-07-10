@@ -1,4 +1,5 @@
 import os
+from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from core.config import CONFIG
@@ -11,8 +12,19 @@ class Server(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=CONFIG['IO']['OUTPUT_DIR'], **kwargs)
 
     def do_GET(self):
-        if self.path == '/events':
-            self.send_response(200)
+        # Handle search requests
+        if self.path.startswith('/search/'):
+            uri = self.path.split('/search')[1]
+            file_path = self.translate_path(uri)
+            if os.path.isfile(file_path):
+                self.send_response(HTTPStatus.OK)
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+            else:
+                self.send_error(HTTPStatus.NOT_FOUND, "File not found")
+        # Handle event stream requests
+        elif self.path == '/events':
+            self.send_response(HTTPStatus.OK)
             self.send_header('Content-Type', 'text/event-stream')
             self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
@@ -21,6 +33,7 @@ class Server(SimpleHTTPRequestHandler):
                 self.handle_buffer()
             except ConnectionAbortedError:
                 pass
+        # Handle all other requests
         else:
             if CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']:
                 # Check if the requested path points to a file
