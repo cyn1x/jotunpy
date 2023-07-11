@@ -58,6 +58,8 @@ def convert_markdown(input_dir):
                 output_text = add_posts(html_document)  # Show a shortcut to the latest blog posts
 
             dst_dir = os.path.join(CONFIG['IO']['OUTPUT_DIR'], input_dir.replace('docs', 'html'))
+            if filename == 'index.md':
+                dst_dir = CONFIG['IO']['OUTPUT_DIR']
             if not os.path.exists(dst_dir):
                 os.makedirs(dst_dir)
             write_file(os.path.join(dst_dir, filename.replace('.md', '.html')),
