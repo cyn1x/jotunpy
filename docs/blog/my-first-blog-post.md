@@ -1,7 +1,7 @@
 ---
 title: My First Blog Post
 author: John Smith
-year: 2023
+datetime: 2023-05-08T20:12:03+10:00
 template: post.html
 ---
 

@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+from datetime import datetime
 
 import markdown
 import sass
@@ -99,9 +100,19 @@ def compile_sass():
 
 def convert_to_html(input_text):
     """Compile Markdown files to HTML using Python-Markdown"""
+    lines = input_text.split('\n')
+    metadata = parse_metadata(lines)
+
+    # Parse input text to HTML
+    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), extensions=['nl2br'])
+
+    return metadata, html
+
+
+def parse_metadata(lines):
     count = 0
     metadata = {}
-    lines = input_text.split('\n')
+
     for line in lines:
         if line.startswith('---'):
             count += 1
@@ -112,10 +123,7 @@ def convert_to_html(input_text):
         if len(parts) == 2:
             metadata[parts[0].strip()] = parts[1].strip()
 
-    # Parse input text to HTML
-    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), extensions=['nl2br'])
-
-    return metadata, html
+    return metadata
 
 
 def render(metadata, html):
@@ -159,10 +167,22 @@ def collect_posts():
     contents = ''
     ext = 'html'
     for filename in os.listdir(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog')):
+        markdown_input = read_file(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog', filename))
+        lines = markdown_input.split('\n')
+        metadata = parse_metadata(lines)
+        creation_date = metadata.get('datetime')
+        human_readable_datetime = datetime.strptime(creation_date, '%Y-%m-%dT%H:%M:%S%z').strftime('%B %d, %Y')
+
         name = filename.split('.')[0]
         contents += f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
-                    f'{name.title().replace("-", " ")}' \
-                    f'</a>'
+                    f'<p>{name.title().replace("-", " ")}</p>' \
+                    f'</a>' \
+                    f'<p>{human_readable_datetime}</p>'
+
+    if contents == '':
+        contents = "<p>There doesn't seem to be anything here yet. Check back later or subscribe to the RSS feed " \
+                      'to be notified when new blog posts are published.</p>'
+
     return contents
 
 
