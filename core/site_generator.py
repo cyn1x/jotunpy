@@ -170,7 +170,7 @@ def collect_posts():
         markdown_input = read_file(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog', filename))
         lines = markdown_input.split('\n')
         metadata = parse_metadata(lines)
-        creation_date = metadata.get('datetime')
+        creation_date = metadata.get('published')
         human_readable_datetime = datetime.strptime(creation_date, '%Y-%m-%dT%H:%M:%S%z').strftime('%B %d, %Y')
 
         name = filename.split('.')[0]
