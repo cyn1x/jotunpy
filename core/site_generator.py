@@ -19,11 +19,13 @@ env = Environment(loader=FileSystemLoader('templates'))
 def build_site():
     build_start = time.perf_counter()
 
-    reset_dist()
+    # Clear output directory before build
+    shutil.rmtree(CONFIG['IO']['OUTPUT_DIR'], ignore_errors=True)
+
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
-        copy_utils()
-    convert_markdown(CONFIG['IO']['INPUT_DIR'])
-    convert_markdown(os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog'))
+        copy_utils()  # Copy development mode utility files
+
+    search_markdown_files(CONFIG['IO']['INPUT_DIR'])
     copy_static_files('js')
     copy_static_files('img')
     compile_sass()
@@ -32,10 +34,13 @@ def build_site():
     print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
 
 
-def reset_dist():
-    shutil.rmtree(CONFIG['IO']['OUTPUT_DIR'], ignore_errors=True)
-    os.makedirs(CONFIG['IO']['OUTPUT_DIR'])
-    os.makedirs(os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog'))
+def search_markdown_files(input_dir):
+    """Recursively loop through input Markdown files and dispatch for conversion"""
+    convert_markdown(input_dir)
+    for filename in os.listdir(input_dir):
+        file = '/'.join([input_dir, filename])
+        if os.path.isdir('/'.join([input_dir, filename])):
+            search_markdown_files(file)
 
 
 def convert_markdown(input_dir):
@@ -52,8 +57,10 @@ def convert_markdown(input_dir):
             if filename.split('.')[0] == CONFIG['SETTINGS']['BLOG_HOMEPAGE'].split('.')[0]:
                 output_text = add_posts(html_document)  # Show a shortcut to the latest blog posts
 
-            write_dir = determine_html_subdir(metadata)
-            write_file(os.path.join(write_dir, filename.replace('.md', '.html')),
+            dst_dir = os.path.join(CONFIG['IO']['OUTPUT_DIR'], input_dir.replace('docs', 'html'))
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+            write_file(os.path.join(dst_dir, filename.replace('.md', '.html')),
                        output_text if output_text else html_document)
 
 
@@ -184,12 +191,3 @@ def collect_posts():
                       'to be notified when new blog posts are published.</p>'
 
     return contents
-
-
-def determine_html_subdir(metadata):
-    if metadata.get('template') == 'post.html':
-        return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html', 'blog')
-    elif metadata.get('template') != 'index.html':
-        return os.path.join(CONFIG['IO']['OUTPUT_DIR'], 'html')
-    else:
-        return CONFIG['IO']['OUTPUT_DIR']
