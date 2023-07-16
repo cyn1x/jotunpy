@@ -26,8 +26,14 @@ def build_site():
         copy_utils()  # Copy development mode utility files
 
     search_markdown_files(CONFIG['IO']['INPUT_DIR'])
-    copy_static_files('js')
-    copy_static_files('img')
+
+    exclusions = CONFIG['SETTINGS']['EXCLUDED_STATIC_DIRS'].split(',')
+    static_dir = CONFIG['IO']['STATIC_DIR']
+    for filename in os.listdir(static_dir):
+        if os.path.isdir('/'.join([static_dir, filename])) \
+                and not exclusions.__contains__(filename):
+            copy_static_files(filename)
+
     compile_sass()
 
     build_finish = time.perf_counter()
