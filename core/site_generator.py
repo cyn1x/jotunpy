@@ -22,17 +22,25 @@ def build_site():
     # Clear output directory before build
     shutil.rmtree(CONFIG['IO']['OUTPUT_DIR'], ignore_errors=True)
 
+    # Copy development mode utility files if in debug mode
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
-        copy_utils()  # Copy development mode utility files
+        copy_utils()
 
-    search_markdown_files(CONFIG['IO']['INPUT_DIR'])
+    compile_markdown(CONFIG['IO']['INPUT_DIR'])
 
+    # Exclude any static directories that have their own defined handlers
     exclusions = CONFIG['SETTINGS']['EXCLUDED_STATIC_DIRS'].split(',')
     static_dir = CONFIG['IO']['STATIC_DIR']
     for filename in os.listdir(static_dir):
-        if os.path.isdir('/'.join([static_dir, filename])) \
-                and not exclusions.__contains__(filename):
+        if os.path.isdir('/'.join([static_dir, filename])) and not exclusions.__contains__(filename):
             copy_static_files(filename)
+
+    # Copy any relevant files for search engine crawlers if they exist
+    inclusions = CONFIG['SETTINGS']['CRAWLER_FILES'].split(',')
+    for filename in os.listdir('./'):
+        file = os.path.join('./', filename)
+        if os.path.exists(file) and os.path.isfile(file) and inclusions.__contains__(filename):
+            shutil.copy(file, CONFIG['IO']['OUTPUT_DIR'])
 
     compile_sass()
 
@@ -40,13 +48,13 @@ def build_site():
     print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
 
 
-def search_markdown_files(input_dir):
+def compile_markdown(input_dir):
     """Recursively loop through input Markdown files and dispatch for conversion"""
     convert_markdown(input_dir)
     for filename in os.listdir(input_dir):
         file = '/'.join([input_dir, filename])
         if os.path.isdir('/'.join([input_dir, filename])):
-            search_markdown_files(file)
+            compile_markdown(file)
 
 
 def convert_markdown(input_dir):
