@@ -1,14 +1,14 @@
 ---
-title: My First Blog Post
+title: My Second Blog Post
 author: John Smith
 template: post.html
-description: My very first blog post on the internet!
+description: My second blog post on the internet!
 category: personal
 ---
 
 <br />
 
-Welcome to my blog! This is my first post, and I'm excited to share my thoughts with you.
+Welcome to my blog! This is my second post, and I'm excited to share my thoughts with you.
 <br />
 
 ## My Thoughts
@@ -19,4 +19,6 @@ I think that static site generators are a great way to build simple websites. Th
 ## Conclusion
 <br />
 
-That's all for now! Thanks for reading my first blog post. I hope you found it interesting and informative.
+That's all for now! Thanks for reading my second blog post. I hope you found it interesting and informative.
+
+```

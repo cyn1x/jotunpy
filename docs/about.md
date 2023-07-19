@@ -1,7 +1,6 @@
 ---
 title: My First About Page
 author: John Smith
-published: 2023-06-03 13:17:41
 template: about.html
 ---
 

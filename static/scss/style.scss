@@ -16,7 +16,6 @@ h1, h2 { @include heading-font-stack; }
 li, a, button {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
-    color: $tertiary-colour;
     text-decoration: none;
 }
 
@@ -47,6 +46,17 @@ header {
 }
 
 main {
+    .post-list {
+        li {
+            margin-bottom: 10px;
+            list-style: none;
+        }
+
+        li:first-child { margin-top: 0px; }
+
+        li:last-child { margin-bottom: 0px; }
+    }
+
     a { text-decoration: underline; }
     
     padding: 50px 10%;

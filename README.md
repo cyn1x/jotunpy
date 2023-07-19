@@ -95,3 +95,14 @@ production: {
   key: 'value'
 }
 ```
+
+## Blog
+
+Blog posts are only published in the `site.rss` feed if a build is triggered for production. Site rebuilds in 
+development mode will not update the `site.rss` feed, and instead use the time of generation as a placeholder for 
+the publication date of the blog post in HTML.
+
+### Database
+
+An SQLite database is used to store blog post metadata. The database is created in the root directory of the project 
+when a new project is created.

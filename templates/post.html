@@ -13,6 +13,9 @@
     {%- endfilter %}
   </header>
   <main>
+    <h1>{{ title }}</h1>
+    {{ published }}
+    <br />
     {{ content|indent(4, False) }}
   </main>
   <footer>

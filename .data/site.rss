@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss version="2.0">
+  <channel>
+    <title>John Smith</title>
+    <link>https://localhost:8000</link>
+    <description>My blog description</description>
+    <language>en-au</language>
+    <lastBuildDate>Wed, 19 Jul 2023 19:43:36 +1000</lastBuildDate>
+    <item>
+      <title>My First Blog Post</title>
+      <link>https://localhost:8000/html/blog/my-first-blog-post.html</link>
+      <description>My very first blog post on the internet!</description>
+      <pubDate>Tue, 18 Jul 2023 20:50:01 +1000</pubDate>
+      <guid>https://localhost:8000/html/blog/my-first-blog-post.html</guid>
+    </item>
+    <item>
+      <title>My Second Blog Post</title>
+      <link>https://localhost:8000/html/blog/my-second-blog-post.html</link>
+      <description>My second blog post on the internet!</description>
+      <pubDate>Wed, 19 Jul 2023 19:43:36 +1000</pubDate>
+      <guid>https://localhost:8000/html/blog/my-second-blog-post.html</guid>
+    </item>
+  </channel>
+</rss>
