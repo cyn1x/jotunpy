@@ -106,7 +106,7 @@ def compile_sass():
     if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
         style = 'expanded'
     else:
-        style = CONFIG['SETTINGS']['CSS_OUTPUT_STYLE']
+        style = CONFIG['OPTIMIZATION']['CSS_OUTPUT_STYLE']
 
     try:
         sass.compile(
