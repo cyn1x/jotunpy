@@ -6,7 +6,9 @@ to refresh the client browser on state change.
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Clone the repository and run the `install.bat` script to install the required dependencies. The script will create a 
+new virtual environment in the `venv` directory, and install all the required dependencies into the virtual
+environment. The script will also create a new `config.ini` file in the root directory of the project.
 
 ### Windows
 ```commandline
@@ -98,11 +100,11 @@ production: {
 
 ## Blog
 
-Blog posts are only published in the `site.rss` feed if a build is triggered for production. Site rebuilds in 
-development mode will not update the `site.rss` feed, and instead use the time of generation as a placeholder for 
-the publication date of the blog post in HTML.
+Blog posts are only published in the `site.rss` feed if a build is triggered for production using the `build` option. 
+Site rebuilds in development using the `dev` option mode will not update the `site.rss` feed, and instead use the time 
+of the last development build as a placeholder for the publication date of the blog post in HTML.
 
 ### Database
 
-An SQLite database is used to store blog post metadata. The database is created in the root directory of the project 
-when a new project is created.
+An SQLite database is used to store blog post metadata for published blog posts. The database is created in the root 
+`.data/` directory of the project when a new project is created using the `new` option with the filename `site.db`.
