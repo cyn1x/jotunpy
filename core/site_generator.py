@@ -60,11 +60,10 @@ def convert_markdown(input_dir):
             metadata, html = convert_to_html(input_dir, markdown_input)  # Convert Markdown to HTML
             html_document = render(metadata, html)  # Render HTML document
 
-            output_text = ''
             if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is True:
-                output_text = inject_dev_utils(html_document, filename)  # Inject dev utilities if using the server
+                html_document = inject_dev_utils(html_document, filename)  # Inject dev utilities if using the server
             if filename.split('.')[0] == CONFIG['BLOG']['BLOG_HOMEPAGE'].split('.')[0]:
-                output_text = add_posts(html_document)  # Show a shortcut to the latest blog posts
+                html_document = add_posts(html_document)  # Show a shortcut to the latest blog posts
 
             dst_dir = os.path.join(CONFIG['IO']['OUTPUT_DIR'], input_dir.replace('docs', 'html'))
             if filename == 'index.md':
@@ -72,7 +71,7 @@ def convert_markdown(input_dir):
             if not os.path.exists(dst_dir):
                 os.makedirs(dst_dir)
             write_file(os.path.join(dst_dir, filename.replace('.md', '.html')),
-                       output_text if output_text else html_document)
+                       html_document)
 
 
 def inject_dev_utils(output_text, filename):
