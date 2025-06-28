@@ -190,32 +190,41 @@ def collect_posts():
     contents = ''
     ext = 'html'
     input_dir = os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog')
-    for filename in os.listdir(input_dir):
-        path = os.path.join(input_dir, filename)
-        markdown_input = read_file(path)
-        lines = markdown_input.split('\n')
-        metadata = parse_metadata(lines)
-        web_link = f'{CONFIG["RSS"]["LINK"]}/html/blog/{metadata.get("title").lower().replace(" ", "-")}.html'
+    
+    for root, _, files in os.walk(input_dir):
 
-        if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
-            # Add item to RSS feed if preparing for deployment
-            rss_generator.add_item(metadata, web_link)
-        creation_date = database.get_blog_entry(web_link, 'published')
+        for filename in files:
+            path = os.path.join(root, filename)
 
-        human_readable_datetime = post_published_time(creation_date)
-        # Only provide the parent level link if client-side routing is enabled
-        if CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING'] == 'True':
-            metadata['link'] = f'/blog/{filename.split(".")[0]}.{ext}'
-        else:
-            metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
+            markdown_input = read_file(path)
+            lines = markdown_input.split('\n')
+            metadata = parse_metadata(lines)
 
-        name = filename.split('.')[0]
-        contents += f'<li>' \
-                    f'<a href=\'/html/blog/{name}.{ext}\' class=\'post-link\'>' \
-                    f'<p>{name.title().replace("-", " ")}</p>' \
-                    f'</a>' \
-                    f'<p>{human_readable_datetime}</p>' \
-                    f'</li>'
+            # Replace only the first occurrence of 'docs'
+            new_path = root.replace('docs', 'html', 1).replace("\\", "/")
+
+            relative_path = f'{new_path}/{metadata.get("title").lower().replace(" ", "-")}.html'
+            web_link = f'{CONFIG["RSS"]["LINK"]}/{relative_path}'
+            
+            if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
+                # Add item to RSS feed if preparing for deployment
+                rss_generator.add_item(metadata, web_link)
+            creation_date = database.get_blog_entry(web_link, 'published')
+
+            human_readable_datetime = post_published_time(creation_date)
+            # Only provide the parent level link if client-side routing is enabled
+            if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
+                metadata['link'] = f'/{relative_path.removeprefix("html/")}/{filename.split(".")[0]}.{ext}'
+            else:
+                metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
+
+            name = filename.split('.')[0]
+            contents += f'<li>' \
+                f'<p>{human_readable_datetime}</p>' \
+                f'<a href=\'{metadata["link"]}\' class=\'post-link\'>' \
+                f'{name.title().replace("-", " ")}' \
+                f'</a>' \
+                f'</li>'
 
     if contents == '':
         contents = "<p>There doesn't seem to be anything here yet. Check back later or subscribe to the RSS feed " \
