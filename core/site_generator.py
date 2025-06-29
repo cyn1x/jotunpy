@@ -199,6 +199,8 @@ def collect_posts():
             markdown_input = read_file(path)
             lines = markdown_input.split('\n')
             metadata = parse_metadata(lines)
+            class_list = ''
+            attributes = ''
 
             # Replace only the first occurrence of 'docs'
             new_path = root.replace('docs', 'html', 1).replace("\\", "/")
@@ -215,13 +217,15 @@ def collect_posts():
             # Only provide the parent level link if client-side routing is enabled
             if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
                 metadata['link'] = f'/{relative_path.removeprefix("html/").removesuffix(".html")}'
+                class_list = "data-link"
+                attributes = "onclick=\"route(event)\""
             else:
                 metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
 
             name = filename.split('.')[0]
             contents += f'<li>' \
                 f'<p>{human_readable_datetime}</p>' \
-                f'<a href=\'{metadata["link"]}\' class=\"post-link data-link\" onclick=\"route(event)\">' \
+                f'<a href=\'{metadata["link"]}\' class=\"post-link {class_list}\" {attributes}>' \
                 f'{name.title().replace("-", " ")}' \
                 f'</a>' \
                 f'</li>'
