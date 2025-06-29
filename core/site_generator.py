@@ -214,14 +214,14 @@ def collect_posts():
             human_readable_datetime = post_published_time(creation_date)
             # Only provide the parent level link if client-side routing is enabled
             if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
-                metadata['link'] = f'/{relative_path.removeprefix("html/")}'
+                metadata['link'] = f'/{relative_path.removeprefix("html/").removesuffix(".html")}'
             else:
                 metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
 
             name = filename.split('.')[0]
             contents += f'<li>' \
                 f'<p>{human_readable_datetime}</p>' \
-                f'<a href=\'{metadata["link"]}\' class=\'post-link\'>' \
+                f'<a href=\'{metadata["link"]}\' class=\"post-link data-link\" onclick=\"route(event)\">' \
                 f'{name.title().replace("-", " ")}' \
                 f'</a>' \
                 f'</li>'
