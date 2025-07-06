@@ -18,7 +18,7 @@ if %errorlevel% equ 0 (
 :install
     REM install virtual environment and required dependencies
     echo Configuring virtual environment
-    python -m venv %~dp0\venv
+    python -m venv %~dp0\.venv
 
     echo Installing required dependencies
     %~dp0\venv\Scripts\pip.exe install -r %~dp0\requirements.txt
