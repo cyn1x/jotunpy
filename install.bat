@@ -21,7 +21,7 @@ if %errorlevel% equ 0 (
     python -m venv %~dp0\.venv
 
     echo Installing required dependencies
-    %~dp0\venv\Scripts\pip.exe install -r %~dp0\requirements.txt
+    %~dp0\.venv\Scripts\pip.exe install -r %~dp0\requirements.txt
 
     echo:
     if %errorlevel% equ 0 (
@@ -33,7 +33,7 @@ if %errorlevel% equ 0 (
     )
 
 :success
-    echo Run `venv\Scripts\activate` to activate the virtual environment
+    echo Run `.venv\Scripts\activate` to activate the virtual environment
     echo Run `python main.py -h` to see the available help information
     echo Read the README at https://github.com/cyn1x/jotunpy for further information
 
