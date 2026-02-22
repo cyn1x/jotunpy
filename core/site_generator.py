@@ -122,7 +122,9 @@ def convert_to_html(input_dir, input_text):
     metadata = parse_metadata(lines)
     if input_dir.split('/')[-1] == 'blog':
         web_link = f'{CONFIG["RSS"]["LINK"]}/html/blog/{metadata.get("title").lower().replace(" ", "-")}.html'
-        metadata['published'] = database.get_blog_entry(web_link, 'published')[0]
+        datetime_str = database.get_blog_entry(web_link, 'published')[0]
+        formatted_datetime = post_published_time(datetime_str, True)
+        metadata['published'] = formatted_datetime
 
     # Parse input text to HTML
     html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), extensions=['nl2br'])
@@ -204,16 +206,28 @@ def collect_posts():
 
             # Replace only the first occurrence of 'docs'
             new_path = root.replace('docs', 'html', 1).replace("\\", "/")
+            
+            title = metadata.get("title")
+            if title is None: 
+                continue
 
-            relative_path = f'{new_path}/{metadata.get("title").lower().replace(" ", "-")}.html'
+            relative_path = f'{new_path}/{title.lower().replace(" ", "-")}.html'
             web_link = f'{CONFIG["RSS"]["LINK"]}/{relative_path}'
             
             if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
                 # Add item to RSS feed if preparing for deployment
-                rss_generator.add_item(metadata, web_link)
-            creation_date = database.get_blog_entry(web_link, 'published')
+                rss_generator.add_item(metadata, web_link) 
 
-            human_readable_datetime = post_published_time(creation_date)
+            creation_date = database.get_blog_entry(web_link, 'published')
+            if creation_date is None:
+                # Use a default date if the blog post has not been published yet, i.e. it is a draft in development mode
+                creation_date = util.format_datetime('%Y-%m-%dT%H:%M:%S%z')
+            elif isinstance(creation_date, tuple):
+                # Otherwise, use the published date retrieved from the database
+                creation_date = creation_date[0]
+
+            formatted_datetime = post_published_time(creation_date, verbose = False)
+
             # Only provide the parent level link if client-side routing is enabled
             if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
                 metadata['link'] = f'/{relative_path.removeprefix("html/").removesuffix(".html")}'
@@ -224,10 +238,10 @@ def collect_posts():
 
             name = filename.split('.')[0]
             contents += f'<li>' \
-                f'<p>{human_readable_datetime}</p>' \
                 f'<a href=\'{metadata["link"]}\' class=\"post-link {class_list}\" {attributes}>' \
                 f'{name.title().replace("-", " ")}' \
                 f'</a>' \
+                f'<p>{formatted_datetime}</p>' \
                 f'</li>'
 
     if contents == '':
@@ -237,22 +251,21 @@ def collect_posts():
     return contents
 
 
-def post_published_time(creation_date):
+def post_published_time(creation_date, verbose):
     """Converts the creation date of a blog post to a human-readable format"""
-    if creation_date is None:
-        # Use a default date if the blog post has not been published yet, i.e. it is a draft in development mode
-        creation_date = util.format_datetime('%a, %d %b %Y %H:%M:%S %z')
-    else:
-        # Otherwise, use the date the blog post was published
-        creation_date = creation_date[0]
-
-    dt = util.datetime.strptime(creation_date, '%a, %d %b %Y %H:%M:%S %z')
-    tz_name = util.datetime_tz_name()
+    dt = util.datetime.strptime(creation_date, '%Y-%m-%dT%H:%M:%S%z')
+    tz_name = util.datetime_tz_name(dt)
     abbreviated_tz_name = util.abbreviated_tz_name(tz_name)
-    human_readable_datetime = util.datetime.strptime(creation_date, '%a, %d %b %Y %H:%M:%S %z') \
-        .strftime(f'%B %d, %Y, %I:%M %p {abbreviated_tz_name} {util.append_utc_offset(dt)}')
 
-    return human_readable_datetime
+    if verbose is True:
+        fmt_str = f'%B %d, %Y, %I:%M %p {abbreviated_tz_name} {util.append_utc_offset(dt)}'
+    else:
+        fmt_str = f'%B %d, %Y'
+
+    formatted_datetime = util.datetime.strptime(creation_date, '%Y-%m-%dT%H:%M:%S%z') \
+        .strftime(fmt_str)
+
+    return formatted_datetime
 
 
 def copy_site_meta(inclusions):
