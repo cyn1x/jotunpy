@@ -121,6 +121,7 @@ def convert_to_html(input_dir: str, input_text):
     """Compile Markdown files to HTML using Python-Markdown"""
     lines = input_text.split('\n')
     metadata = parse_metadata(lines)
+
     if input_dir.startswith(("blog", "docs/blog")):
         web_link = f'{CONFIG["RSS"]["LINK"]}/html/blog/{metadata.get("title").lower().replace(" ", "-")}.html'
         cached_datetime = database.get_blog_entry(web_link, 'published')
@@ -129,8 +130,11 @@ def convert_to_html(input_dir: str, input_text):
         formatted_datetime = post_published_time(result, True)
         metadata['published'] = formatted_datetime
 
+    extensions = CONFIG["MARKDOWN"].get("EXTENSIONS", "")
+    extensions = extensions.split(',') if extensions else []
     # Parse input text to HTML
-    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), extensions=['nl2br'])
+    html = markdown.markdown('\n'.join(lines[len(metadata) + 2:]), 
+                             extensions=extensions)
 
     return metadata, html
 
