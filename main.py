@@ -27,7 +27,7 @@ def start_dev(opts):
 
 
 def start_build(opts):
-    """Packages static content so that is ready for deployment"""
+    """Packages static content and builds the site"""
     os.environ['ENVIRONMENT'] = 'PRODUCTION'
     update_config("SETTINGS.DEBUG", 'No')
     update_config("IO.OUTPUT_DIR", CONFIG['IO']['BUILD_DIR'])

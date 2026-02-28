@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+from typing import LiteralString
 
 import markdown
 import sass
@@ -8,7 +9,7 @@ import sass
 from jinja2 import Environment, FileSystemLoader, exceptions
 from core import database, html_editor, rss_generator, util
 from core.config import CONFIG, import_env
-from core.util import read_file, write_file
+from core.util import format_datetime, read_file, write_file
 
 # Define the Jinja2 environment and file system loader
 env = Environment(loader=FileSystemLoader('templates'))
@@ -43,7 +44,7 @@ def build_site():
     print(f'Finished site build in {round(build_finish - build_start, 3)} second(s)')
 
 
-def compile_markdown(input_dir):
+def compile_markdown(input_dir: str):
     """Recursively loop through input Markdown files and dispatch for conversion"""
     convert_markdown(input_dir)
     for filename in os.listdir(input_dir):
@@ -116,14 +117,16 @@ def compile_sass():
         print(e)
 
 
-def convert_to_html(input_dir, input_text):
+def convert_to_html(input_dir: str, input_text):
     """Compile Markdown files to HTML using Python-Markdown"""
     lines = input_text.split('\n')
     metadata = parse_metadata(lines)
-    if input_dir.split('/')[-1] == 'blog':
+    if input_dir.startswith(("blog", "docs/blog")):
         web_link = f'{CONFIG["RSS"]["LINK"]}/html/blog/{metadata.get("title").lower().replace(" ", "-")}.html'
-        datetime_str = database.get_blog_entry(web_link, 'published')[0]
-        formatted_datetime = post_published_time(datetime_str, True)
+        cached_datetime = database.get_blog_entry(web_link, 'published')
+        curr_datetime = format_datetime('%Y-%m-%dT%H:%M:%S%z')
+        result = curr_datetime if cached_datetime is None else cached_datetime[0]
+        formatted_datetime = post_published_time(result, True)
         metadata['published'] = formatted_datetime
 
     # Parse input text to HTML

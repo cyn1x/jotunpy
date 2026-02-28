@@ -12,7 +12,7 @@ def clear_terminal():
 
 
 def read_file(file):
-    f = open(file, 'r')
+    f = open(file, 'r', encoding="utf-8")
     contents = f.read()
     f.close()
 
