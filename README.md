@@ -108,4 +108,5 @@ of the last development build as a placeholder for the publication date of the b
 
 ### Database
 
-An SQLite database is used to store blog post metadata for published blog posts. The database is created in the root `.data/` directory of the project when a new project is created using the `new` option with the filename `site.db`.
+An SQLite database is used to store blog post metadata for published blog posts. 
+The database is created in the root `.data/` directory of the project when a new project is created using the `new` option with the filename `site.db`.

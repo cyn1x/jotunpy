@@ -239,7 +239,7 @@ def collect_posts():
             if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
                 metadata['link'] = f'/{relative_path.removeprefix("html/").removesuffix(".html")}'
                 class_list = "data-link"
-                attributes = "onclick=\"route(event)\""
+                # attributes = "onclick=\"route(event)\""
             else:
                 metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
 
