@@ -57,7 +57,6 @@ def convert_markdown(input_dir):
     """Loop through input Markdown files and dispatch for conversion"""
     for filename in os.listdir(input_dir):
         if filename.endswith('.md'):
-            print(filename)
             markdown_input = read_markdown_file(os.path.join(input_dir, filename))
             if markdown_input is None:
                 continue
@@ -209,7 +208,6 @@ def collect_posts():
             path = os.path.join(root, filename)
 
             markdown_input = read_markdown_file(path)
-            print(markdown_input)
             if markdown_input is None:
                 continue
             lines = markdown_input.split('\n')
