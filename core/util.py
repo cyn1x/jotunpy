@@ -11,15 +11,24 @@ def clear_terminal():
         os.system("cls")
 
 
-def read_file(file):
-    f = open(file, 'r', encoding="utf-8")
+def read_utf8_strict(path) -> str:
+    f = open(path, 'r', encoding="utf-8", errors="strict")
     contents = f.read()
     f.close()
 
     return contents
 
 
-def write_file(file, contents):
+def read_markdown_file(path):
+    try:
+        text = read_utf8_strict(path)
+    except UnicodeDecodeError:
+        return None
+
+    return text
+
+
+def write_html_file(file, contents):
     f = open(file, 'w', encoding="utf-8")
     f.write(contents)
     f.close()

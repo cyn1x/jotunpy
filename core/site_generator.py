@@ -9,7 +9,7 @@ import sass
 from jinja2 import Environment, FileSystemLoader, exceptions
 from core import database, html_editor, rss_generator, util
 from core.config import CONFIG, import_env
-from core.util import format_datetime, read_file, write_file
+from core.util import format_datetime, read_markdown_file, write_html_file
 
 # Define the Jinja2 environment and file system loader
 env = Environment(loader=FileSystemLoader('templates'))
@@ -57,7 +57,10 @@ def convert_markdown(input_dir):
     """Loop through input Markdown files and dispatch for conversion"""
     for filename in os.listdir(input_dir):
         if filename.endswith('.md'):
-            markdown_input = read_file(os.path.join(input_dir, filename))
+            print(filename)
+            markdown_input = read_markdown_file(os.path.join(input_dir, filename))
+            if markdown_input is None:
+                continue
             metadata, html = convert_to_html(input_dir, markdown_input)  # Convert Markdown to HTML
             html_document = render(metadata, html)  # Render HTML document
 
@@ -71,7 +74,7 @@ def convert_markdown(input_dir):
                 dst_dir = CONFIG['IO']['OUTPUT_DIR']
             if not os.path.exists(dst_dir):
                 os.makedirs(dst_dir)
-            write_file(os.path.join(dst_dir, filename.replace('.md', '.html')),
+            write_html_file(os.path.join(dst_dir, filename.replace('.md', '.html')),
                        html_document)
 
 
@@ -205,7 +208,10 @@ def collect_posts():
         for filename in files:
             path = os.path.join(root, filename)
 
-            markdown_input = read_file(path)
+            markdown_input = read_markdown_file(path)
+            print(markdown_input)
+            if markdown_input is None:
+                continue
             lines = markdown_input.split('\n')
             metadata = parse_metadata(lines)
             class_list = ''
