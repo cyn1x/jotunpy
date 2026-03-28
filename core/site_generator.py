@@ -1,7 +1,6 @@
 import os
 import shutil
 import time
-from typing import LiteralString
 
 import markdown
 import sass
