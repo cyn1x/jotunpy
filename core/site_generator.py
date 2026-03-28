@@ -231,11 +231,12 @@ def collect_posts():
             creation_date = database.get_blog_entry(web_link, 'published')
             if creation_date is None:
                 # Use a default date if the blog post has not been published yet, i.e. it is a draft in development mode
-                creation_date = util.format_datetime('%Y-%m-%dT%H:%M:%S%z')
+                pass
             elif isinstance(creation_date, tuple):
                 # Otherwise, use the published date retrieved from the database
                 creation_date = creation_date[0]
 
+            creation_date = util.format_datetime('%Y-%m-%dT%H:%M:%S%z')
             formatted_datetime = post_published_time(creation_date, verbose = False)
 
             # Only provide the parent level link if client-side routing is enabled
