@@ -124,7 +124,14 @@ def convert_to_html(input_dir: str, input_text):
     metadata = parse_metadata(lines)
 
     if input_dir.startswith(("blog", "docs/blog")):
-        web_link = f'{CONFIG["RSS"]["LINK"]}/html/blog/{metadata.get("title").lower().replace(" ", "-")}.html'
+
+        # Remove "docs" prefex and prepend with "html"
+        path = "html" + input_dir.removeprefix("docs");
+        relative_path = f'{path}/{metadata.get("title").lower().replace(" ", "-")}.html'
+        if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
+            relative_path = relative_path.removeprefix("html/").removesuffix(".html")
+
+        web_link = f'{CONFIG["RSS"]["LINK"]}/{relative_path}'
         cached_datetime = database.get_blog_entry(web_link, 'published')
         curr_datetime = format_datetime('%Y-%m-%dT%H:%M:%S%z')
         result = curr_datetime if cached_datetime is None else cached_datetime[0]
@@ -198,7 +205,6 @@ def collect_posts():
     database.create_table('blog')
 
     contents = ''
-    ext = 'html'
     input_dir = os.path.join(CONFIG['IO']['INPUT_DIR'], 'blog')
     
     for root, _, files in os.walk(input_dir):
@@ -216,14 +222,21 @@ def collect_posts():
 
             # Replace only the first occurrence of 'docs'
             new_path = root.replace('docs', 'html', 1).replace("\\", "/")
-            
+
             title = metadata.get("title")
             if title is None: 
                 continue
 
             relative_path = f'{new_path}/{title.lower().replace(" ", "-")}.html'
+
+            # Only provide the parent level link if client-side routing is enabled
+            if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
+                relative_path = relative_path.removeprefix("html/").removesuffix(".html")
+                class_list = "data-link"
+
+            metadata['link'] = relative_path
             web_link = f'{CONFIG["RSS"]["LINK"]}/{relative_path}'
-            
+
             if bool(CONFIG['SETTINGS'].getboolean('DEBUG')) is False:
                 # Add item to RSS feed if preparing for deployment
                 rss_generator.add_item(metadata, web_link) 
@@ -236,16 +249,7 @@ def collect_posts():
                 # Otherwise, use the published date retrieved from the database
                 creation_date = creation_date[0]
 
-            creation_date = util.format_datetime('%Y-%m-%dT%H:%M:%S%z')
             formatted_datetime = post_published_time(creation_date, verbose = False)
-
-            # Only provide the parent level link if client-side routing is enabled
-            if int(CONFIG['SETTINGS']['CLIENT_SIDE_ROUTING']) == 1:
-                metadata['link'] = f'/{relative_path.removeprefix("html/").removesuffix(".html")}'
-                class_list = "data-link"
-                # attributes = "onclick=\"route(event)\""
-            else:
-                metadata['link'] = f'/html/blog/{filename.split(".")[0]}.{ext}'
 
             name = filename.split('.')[0]
             contents += f'<li>' \
@@ -269,9 +273,9 @@ def post_published_time(creation_date, verbose):
     abbreviated_tz_name = util.abbreviated_tz_name(tz_name)
 
     if verbose is True:
-        fmt_str = f'%B %d, %Y, %I:%M %p {abbreviated_tz_name} {util.append_utc_offset(dt)}'
+        fmt_str = f'%A, %d %B %Y, %H:%M {abbreviated_tz_name} {util.append_utc_offset(dt)}'
     else:
-        fmt_str = f'%B %d, %Y'
+        fmt_str = f'%d %B %Y'
 
     formatted_datetime = util.datetime.strptime(creation_date, '%Y-%m-%dT%H:%M:%S%z') \
         .strftime(fmt_str)

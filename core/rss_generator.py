@@ -10,8 +10,10 @@ def add_item(metadata: dict, uri: str):
     node = f'channel/item[guid="{uri}"]'
 
     # Create timestamp and add it to the metadata dictionary
-    pub_date = util.format_datetime('%a, %d %b %Y %H:%M:%S %z')
-    metadata['published'] = pub_date
+    datetime = util.datetime.now()
+    date = util.format_datetime('%Y-%m-%dT%H:%M:%S%z', datetime)
+    pub_date = util.format_datetime('%a, %d %b %Y %H:%M:%S %z', datetime)
+    metadata['published'] = date
     metadata['link'] = metadata.get('link')
 
     exists_in_rss = root.find(node) is not None
@@ -25,7 +27,9 @@ def add_item(metadata: dict, uri: str):
             database.insert_blog_entry(metadata)
             return
         case (False, True):  # This will only happen if the database is manually edited
-            pub_date = database.get_blog_entry(uri, 'published')[0]
+            date = database.get_blog_entry(uri, 'published')[0]
+            pub_date = util.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z') \
+                .strftime('%a, %d %b %Y %H:%M:%S %z')
             metadata['published'] = pub_date
         case (False, False):  # This is the expected case
             # Add the item to the database
